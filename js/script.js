@@ -1,87 +1,79 @@
-const movieDB = {
-  movies: [
-    "Логан",
-    "Лига справедливости",
-    "Ла-ла лэнд",
-    "Одержимость",
-    "Скотт Пилигрим против...",
-  ],
-};
+"use strict";
 
-document.querySelectorAll(".promo__adv img").forEach((item) => {
-  item.remove();
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const movieDB = {
+    movies: [
+      "Логан",
+      "Лига справедливости",
+      "Ла-ла лэнд",
+      "Одержимость",
+      "Скотт Пилигрим против...",
+    ],
+  };
 
-document.querySelector(".promo__genre").textContent = "драма";
-document.querySelector(".promo__bg").style.backgroundImage =
-  "url('img/bg.jpg')";
-movieDB.movies.sort();
+  const addForm = document.querySelector("form.add"),
+    addInput = addForm.querySelector(".adding__input"),
+    checkbox = addForm.querySelector("[type='checkbox']"),
+    adv = document.querySelectorAll(".promo__adv img");
 
-const movlist = document.querySelector(".promo__interactive-list");
-movlist.innerHTML = "";
+  addForm.addEventListener("submit", (event) => {
+    event.preventDefault();
 
-movieDB.movies.forEach((film, id) => {
-  movlist.innerHTML += `<li class="promo__interactive-item">${id + 1}. ${film}
-                            <div class="delete"></div>
-                        </li>`;
-});
+    let newFilm = addInput.value;
+    const favorite = checkbox.checked;
+    if (newFilm) {
+      if (newFilm.length > 21) {
+        newFilm = `${newFilm.substring(0, 22)}...`;
+      }
+      if (favorite) {
+        console.log("Добавляем любимы фильм");
+      }
+      movieDB.movies.push(newFilm);
+      sortArr(movieDB.movies);
 
-const btnAdd = document.querySelector(".add button"),
-  inpValue = document.querySelector(".add input");
+      createMovieList(movieDB.movies, movlist);
+    }
+    event.target.reset();
+  });
 
-const addFilmList = (event) => {
-  event.preventDefault();
-  let vrem;
-  if (inpValue.value.length > 21) {
-    vrem = inpValue.value;
-    vrem = vrem.slice(0, 21);
-    console.log(vrem);
-    vrem += "...";
-    movieDB.movies.push(vrem);
-  } else {
-    movieDB.movies.push(inpValue.value);
+  const deleteAdv = (arr) => {
+    arr.forEach((item) => {
+      item.remove();
+    });
+  };
+
+  const makeChanges = () => {
+    document.querySelector(".promo__genre").textContent = "драма";
+
+    document.querySelector(".promo__bg").style.backgroundImage =
+      "url('img/bg.jpg')";
+  };
+
+  const sortArr = (arr) => {
+    arr.sort();
+  };
+
+  const movlist = document.querySelector(".promo__interactive-list");
+
+  function createMovieList(film, parent) {
+    parent.innerHTML = "";
+    sortArr(film);
+    film.forEach((film, id) => {
+      parent.innerHTML += `<li class="promo__interactive-item">${
+        id + 1
+      }. ${film}
+                                <div class="delete"></div>
+                            </li>`;
+    });
+    document.querySelectorAll(".delete").forEach((btn, i) => {
+      btn.addEventListener("click", () => {
+        btn.parentElement.remove();
+        movieDB.movies.splice(i, 1);
+        createMovieList(film, parent);
+      });
+    });
   }
-  movieDB.movies.sort();
-  inpValue.value = "";
-  movlist.innerHTML = ""; // Очищаем список перед обновлением
-  movieDB.movies.forEach((film, id) => {
-    movlist.innerHTML += `<li class="promo__interactive-item">${id + 1}. ${film}
-                              <div class="delete"></div>
-                          </li>`;
-  });
-
-  // Обновляем обработчики событий для всех элементов с классом .delete
-  updateDeleteHandlers();
-
-  if (document.querySelectorAll(".add input")[1].checked) {
-    console.log("Добавляем любимый фильм");
-  }
-};
-
-btnAdd.addEventListener("click", addFilmList);
-
-const delItem = (event) => {
-  event.target.parentElement.remove();
-  const index = Array.from(movlist.children).indexOf(
-    event.target.parentElement
-  );
-  movieDB.movies.splice(index, 1);
-  movlist.innerHTML = ""; // Очищаем список перед обновлением
-  movieDB.movies.forEach((film, id) => {
-    movlist.innerHTML += `<li class="promo__interactive-item">${id + 1}. ${film}
-                              <div class="delete"></div>
-                          </li>`;
-  });
-  updateDeleteHandlers();
-};
-
-// Функция для обновления обработчиков событий
-const updateDeleteHandlers = () => {
-  const delTrash = document.querySelectorAll(".delete");
-  delTrash.forEach((item) => {
-    item.addEventListener("click", delItem);
-  });
-};
-
-// Инициализация обработчиков событий при загрузке страницы
-updateDeleteHandlers();
+  makeChanges();
+  deleteAdv(adv);
+  createMovieList(movieDB.movies, movlist);
+});
